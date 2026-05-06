@@ -1,0 +1,22 @@
+{
+	"name": "@bryantkelley/meshres",
+	"version": "0.0.1",
+	"description": "Stream MeshCore messages into Resonite",
+	"license": "MIT",
+	"author": "Bryant Kelley",
+	"type": "module",
+	"main": "index.ts",
+	"scripts": {
+		"start": "tsx --env-file=.env index.ts",
+		"setup": "tsx scripts/convert_txt.ts"
+	},
+	"dependencies": {
+		"@liamcottle/meshcore.js": "^1.12.0",
+		"ws": "^8.20.0"
+	},
+	"devDependencies": {
+		"@types/node": "^24.9.0",
+		"@types/ws": "^8.18.1",
+		"tsx": "^4.20.6"
+	}
+}
