@@ -42,13 +42,13 @@ connection.on(Constants.PushCodes.MsgWaiting, async () => {
             // Do not show DMs
             if (message.channelMessage) {
                 // send channel messages
-                const packet = {
+                const packet: Message & { channelName: string } = {
                     ...message.channelMessage,
                     channelName: channelNames[message.channelMessage.channelIdx],
                 }
 
                 if (packet.channelName === allowedChannel) {
-                    const [senderName, message] = packet.channelMessage.split(": ", 1);
+                    const [senderName, message] = packet.text.split(": ", 1);
                     // intentionally not sanitizing anything on this side
                     const formattedPacket = `<b>${senderName}</b>: ${message}`;
 
