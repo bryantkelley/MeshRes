@@ -17,6 +17,7 @@ const connection = new NodeJSSerialConnection(process.env.SERIAL_PORT);
 const wss = new WebSocketServer({port: Number.parseInt(process.env.WS_PORT)});
 
 wss.on('connection', (ws) => {
+    console.log('Client connected')
     ws.on('error', (err) => {
         console.error(err)
     });
@@ -50,7 +51,7 @@ connection.on(Constants.PushCodes.MsgWaiting, async () => {
                 if (packet.channelName === allowedChannel) {
                     const [senderName, message] = packet.text.split(": ", 1);
                     // intentionally not sanitizing anything on this side
-                    const formattedPacket = `<b>${senderName}</b>: ${message}`;
+                    const formattedPacket = `<b>${senderName}</b><br>${message}`;
 
                     wss.clients.forEach(async (client) => {
                         if (client.readyState === WebSocket.OPEN) {
