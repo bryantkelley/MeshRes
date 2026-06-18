@@ -49,9 +49,12 @@ connection.on(Constants.PushCodes.MsgWaiting, async () => {
                 }
 
                 if (packet.channelName === allowedChannel) {
-                    const [senderName, message] = packet.text.split(": ", 1);
+                    const separatorIndex = packet.text.trim().indexOf(":");
+                    const senderName: string = packet.text.slice(0, separatorIndex);
+                    const cleanedMessage: string = packet.text.slice(separatorIndex + 2);
                     // intentionally not sanitizing anything on this side
-                    const formattedPacket = `<b>${senderName}</b><br>${message}`;
+                    const formattedPacket = `<b>${senderName}</b><br>${cleanedMessage}`;
+                    console.log(formattedPacket);
 
                     wss.clients.forEach(async (client) => {
                         if (client.readyState === WebSocket.OPEN) {
