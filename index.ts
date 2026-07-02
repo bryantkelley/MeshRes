@@ -58,7 +58,7 @@ connection.on(Constants.PushCodes.MsgWaiting, async () => {
 
                     wss.clients.forEach(async (client) => {
                         if (client.readyState === WebSocket.OPEN) {
-                            client.send(JSON.stringify(formattedPacket));
+                            client.send(formattedPacket);
                         }
                     });
                 }
