@@ -7,8 +7,8 @@ if (!process.env.SERIAL_PORT) {
     throw new Error("Missing SERIAL_PORT");
 }
 
-// Set allowed channel
-const allowedChannel = process.env.ALLOWED_CHANNEL ?? 'Public';
+// Set allowed private channels. Channels beginning with an octothorpe are included by default.
+const allowedPrivateChannels = ['Public'];
 
 // Create connection to companion radio
 const connection = new NodeJSSerialConnection(process.env.SERIAL_PORT);
@@ -47,13 +47,14 @@ connection.on(Constants.PushCodes.MsgWaiting, async () => {
                     ...message.channelMessage,
                     channelName: channelNames[message.channelMessage.channelIdx],
                 }
-
-                if (packet.channelName === allowedChannel) {
+                console.log(packet.channelName);
+                if (packet.channelName.startsWith("#") || allowedPrivateChannels.includes(packet.channelName)) {
+                    console.log(packet);
                     const separatorIndex = packet.text.trim().indexOf(":");
                     const senderName: string = packet.text.slice(0, separatorIndex);
                     const cleanedMessage: string = packet.text.slice(separatorIndex + 2);
-                    // intentionally not sanitizing anything on this side
-                    const formattedPacket = `<b>${senderName}</b><br>${cleanedMessage}`;
+                    const formattedDate = new Date(packet.senderTimestamp * 1000).toISOString();
+                    const formattedPacket = `<size=40%>${packet.channelName} • ${formattedDate}</size><br><size=100%>${senderName}</size><br><size=80%>${cleanedMessage}</size>`;
                     console.log(formattedPacket);
 
                     wss.clients.forEach(async (client) => {
