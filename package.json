@@ -1,6 +1,6 @@
 {
   "name": "@bryantkelley/meshres",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Stream MeshCore messages into Resonite",
   "license": "MIT",
   "author": "Bryant Kelley",
