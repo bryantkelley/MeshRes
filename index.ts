@@ -35,9 +35,20 @@ wss.on("connection", (ws) => {
   ws.on("error", (err) => {
     console.error(err);
   });
+
+  wss.on('message', (data) => {
+    console.log('received: %s', data);
+  });
+  ws.on('message', function message(data) {
+    console.log('received: %s', data);
+  });
 });
 
 wss.on('message', (data) => {
+  console.log('received: %s', data);
+});
+
+wss.on('message', function message(data) {
   console.log('received: %s', data);
 });
 
