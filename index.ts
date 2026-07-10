@@ -30,26 +30,15 @@ const connection = new NodeJSSerialConnection(process.env.SERIAL_PORT);
 // Create Web Socket
 const wss = new WebSocketServer({ port: wsPort });
 
-wss.on("connection", (ws) => {
+wss.on("connection", async (ws) => {
   console.log("Client connected");
   ws.on("error", (err) => {
     console.error(err);
   });
 
-  wss.on('message', (data) => {
-    console.log('received: %s', data);
+  ws.on('message', async function message(data: any) {
+    await relayWSMessage(data);
   });
-  ws.on('message', function message(data) {
-    console.log('received: %s', data);
-  });
-});
-
-wss.on('message', (data) => {
-  console.log('received: %s', data);
-});
-
-wss.on('message', function message(data) {
-  console.log('received: %s', data);
 });
 
 // Initial Setup
@@ -63,6 +52,30 @@ connection.on("connected", async () => {
     channelNames[channel.channelIdx] = channel.name;
   }
 });
+
+const relayWSMessage = async (data: any) => {
+  let stringData = data.toString();
+  console.log('received from ws:', stringData);
+
+  const sliceData = () => {
+    const separatorIndex = stringData.indexOf(";");
+    const sectionLength = Number.parseInt(stringData.slice(0, separatorIndex));
+    const sectionEndIndex = separatorIndex + 1 + sectionLength;
+    const section = stringData.substring(separatorIndex + 1, sectionEndIndex);
+    stringData = stringData.substring(sectionEndIndex + 1);
+    return section;
+  };
+
+  const relayChannel = sliceData();
+  const relaySender = sliceData();
+  const relayMessage = sliceData();
+
+  const { channelIdx } = await connection.findChannelByName(relayChannel);
+
+  setTimeout(async () => {
+    await connection.sendChannelTextMessage(channelIdx, `${relaySender}: ${relayMessage}`);
+  }, 5000);
+}
 
 connection.on(Constants.PushCodes.MsgWaiting, async () => {
   try {
@@ -99,7 +112,7 @@ connection.on(Constants.PushCodes.MsgWaiting, async () => {
             //
             // Example: `6;Public;24;2026-07-06T18:35:00.000Z;6;moss 🦌;6;howdy!`
             const formattedPacket = `${packet.channelName.length};${packet.channelName};${formattedDate.length};${formattedDate};${senderName.length};${senderName};${cleanedMessage.length};${cleanedMessage}`;
-            console.log(formattedPacket);
+            console.log('sending to ws:', formattedPacket);
 
             wss.clients.forEach(async (client) => {
               if (client.readyState === WebSocket.OPEN) {
